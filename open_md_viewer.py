@@ -132,6 +132,13 @@ class open_md_viewer(sublime_plugin.TextCommand):
 						message = x[2: len(x)]
 						x = re.sub("-\s+(.*)$", f"<li>{message}</li>", x)	
 
+					exist = re.findall("^[#]{1,}\s(.*)$", x)
+					if(exist):
+						num = x.index(" ")
+						message = x[num : len(x)]
+						x = re.sub("^[#]{1,}\s(.*)$", f"<h{num}>{message}</h{num}>", x)
+
+
 					exist = re.findall("\n$", x)
 					if(exist):
 						x = re.sub("\n$", "<br>", x)
@@ -141,8 +148,8 @@ class open_md_viewer(sublime_plugin.TextCommand):
 			dynamic images (if height > width... etc. [max size 500 x 500])
 			add support for https:// res:// and data: images
 			add nested blockquotes
-			add the ability to add the things (**, ``, etc.) in the text
 			fix the gaps under the lists
+			add html tag support inside the md section
 		'''
 			
 		f.close()	
