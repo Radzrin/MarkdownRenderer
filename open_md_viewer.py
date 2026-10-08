@@ -17,11 +17,11 @@ class open_md_viewer(sublime_plugin.TextCommand):
 			return True
 
 	def run(self, edit):
-		#self.view.insert(edit, 0, "Hello, World!")
 		current_window= self.view.window()
 		file_path = self.view.file_name()
 		file_n = os.path.splitext(file_path.lower())
 		view = self.view
+
 
 
 		for view in current_window.views_in_group(1):
@@ -53,38 +53,96 @@ class open_md_viewer(sublime_plugin.TextCommand):
 						html += "<br>"		
 					html += x
 
+		inlist = False
+		typelist = ""
 		#md rendering
 		if (".md" in file_n):
 			with open(file_path) as f:
 				for x in f:
-					exist = re.findall("^\[.{1,}\]\(.{1,}\)$", x)
+
+					if(not re.search("^\d+\.+\s+(.*)$", x) and not re.findall("^-\s+(.*)$", x)):
+						if(inlist):
+							inlist = False
+							html += f"</{typelist}>"
+							typelist = ""
+
+					exist = re.findall("(?<!!)\[.+?\]\(.+?\)", x)
 					if(exist):
 						url = x[x.index("(") + 1: x.index(")")]
 						message = x[x.index("[") + 1: x.index("]")]
-						html += f"<a href={url}>{message}</a>"
-						continue
+						x = re.sub("(?<!!)\[.+?\]\(.+?\)", f"<a href={url}>{message}</a>", x)
 
 					exist = re.findall("^(!){1}\[.{1,}\]\(.{1,}\)$", x)	
 					if(exist):
 						url = x[x.index("(") + 1: x.index(")")]
 						message = x[x.index("[") + 1: x.index("]")]
-						html += f"<br><img src=\"file://{url}\" alt=\"{message}\" width=\"500px\" height=\"500px\">"	
-						continue
+						x = re.sub("^(!){1}\[.{1,}\]\(.{1,}\)$",f"<br><img src=\"file://{url}\" alt=\"{message}\" width=\"500px\" height=\"500px\">" ,x)
 
 					exist = re.findall("^(-){3,}$", x)
 					if(exist):
-						html += "<div width=\"100%\" style=\"background-color:white;\"></div>"	
-						continue
+						x = re.sub("^(-){3,}$", "<div width=\"100%\" style=\"background-color:white;\"></div>", x)
 
-					exist = re.findall("^(`){1}.{0,}(`){1}", x)
+					exist = re.findall("(`){1}.{0,}(`){1}", x)
 					if(exist):
 						message = x[x.index("`") + 1: len(x) - 2]
-						html += f"<code>{message}</code>"	
+						x = re.sub("(`){1}.{0,}(`){1}", f"<code>{message}</code>", x)
 
+					exist = re.findall("\*\*(.*?)\*\*", x)
+					if(exist):
+						message = re.findall("[^*]", x)
+						word = ""
+						for w in message:
+							word += w
+						x = re.sub("\*\*(.*?)\*\*", f"<b>{word}</b>", x)	
+
+					exist = re.findall("(?<!\*)\*(?!\*)(.*?)(?<!\*)\*(?!\*)", x)
+					if(exist):
+						message = re.findall("[^*]", x)
+						word = ""
+						for w in message:
+							word += w
+						x = re.sub("(?<!\*)\*(?!\*)(.*?)(?<!\*)\*(?!\*)", f"<em>{word}</em>", x)	
+
+					exist = re.findall("[>] .{0,}", x)
+					if(exist):
+						message = x[2: len(x) - 1]
+						x = re.sub("[>] .{0,}", f"<div style=\"border-left: 3px solid gray;\"><p>{message}</p></div>", x)
+					
+					exist = re.findall("^\d+\.+\s+(.*)$", x)
+					if(exist):
+						if(not inlist):
+							typelist = "ol"
+							html += "<ol>"
+							inlist = True
+						elif(inlist and typelist != "ol"):
+							html += "</ul><br><ol>"
+
+						message = x[2: len(x)]
+						x = re.sub("\d+\.+\s+(.*)$", f"<li>{message}</li>", x)
+
+					exist = re.findall("^-\s+(.*)$", x)
+					if(exist):
+						if(not inlist):
+							typelist = "ul"
+							html += "<ul>"
+							inlist = True
+						elif(inlist and typelist != "ul"):
+							html += "</ol><br><ul>"
+
+						message = x[2: len(x)]
+						x = re.sub("-\s+(.*)$", f"<li>{message}</li>", x)	
+
+					exist = re.findall("\n$", x)
+					if(exist):
+						x = re.sub("\n$", "<br>", x)
+
+					html += x		
 		'''
 			dynamic images (if height > width... etc. [max size 500 x 500])
 			add support for https:// res:// and data: images
-		
+			add nested blockquotes
+			add the ability to add the things (**, ``, etc.) in the text
+			fix the gaps under the lists
 		'''
 			
 		f.close()	
