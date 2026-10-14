@@ -60,55 +60,51 @@ class open_md_viewer(sublime_plugin.TextCommand):
 			with open(file_path) as f:
 				for x in f:
 
-					if(not re.search("^\d+\.+\s+(.*)$", x) and not re.findall("^-\s+(.*)$", x)):
+					if(not re.search(r"^\d+\.+\s+(.*)$", x) and not re.findall(r"^-\s+(.*)$", x)):
 						if(inlist):
 							inlist = False
 							html += f"</{typelist}>"
 							typelist = ""
 
-					exist = re.findall("(?<!!)\[.+?\]\(.+?\)", x)
+
+					exist = re.findall(r"(?<!!)\[([^\]]+)\]\(([^)]+)\)", x)
+					if(exist):
+						x = re.sub(r"(?<!!)\[([^\]]+)\]\(([^)]+)\)", r'<a href="\2">\1</a>', x)
+
+					exist = re.findall(r"^(!){1}\[.{1,}\]\(.{1,}\)$", x)	
 					if(exist):
 						url = x[x.index("(") + 1: x.index(")")]
 						message = x[x.index("[") + 1: x.index("]")]
-						x = re.sub("(?<!!)\[.+?\]\(.+?\)", f"<a href={url}>{message}</a>", x)
+						x = re.sub(r"^(!){1}\[.{1,}\]\(.{1,}\)$",f"<br><img src=\"file://{url}\" alt=\"{message}\" width=\"500px\" height=\"500px\">" ,x)
 
-					exist = re.findall("^(!){1}\[.{1,}\]\(.{1,}\)$", x)	
+					exist = re.findall(r"^(-){3,}$", x)
 					if(exist):
-						url = x[x.index("(") + 1: x.index(")")]
-						message = x[x.index("[") + 1: x.index("]")]
-						x = re.sub("^(!){1}\[.{1,}\]\(.{1,}\)$",f"<br><img src=\"file://{url}\" alt=\"{message}\" width=\"500px\" height=\"500px\">" ,x)
+						x = re.sub(r"^(-){3,}$", "<div width=\"100%\" style=\"background-color:white;\"></div>", x)
 
-					exist = re.findall("^(-){3,}$", x)
+					exist = re.findall(r"`([^`]+)`", x)
 					if(exist):
-						x = re.sub("^(-){3,}$", "<div width=\"100%\" style=\"background-color:white;\"></div>", x)
+						x = re.sub(r"`([^`]+)`", r"<code>\1</code>", x)
 
-					exist = re.findall("(`){1}.{0,}(`){1}", x)
+					exist = re.findall(r"\*\*([^*]*)\*\*", x)
 					if(exist):
-						message = x[x.index("`") + 1: len(x) - 2]
-						x = re.sub("(`){1}.{0,}(`){1}", f"<code>{message}</code>", x)
-
-					exist = re.findall("\*\*(.*?)\*\*", x)
-					if(exist):
-						message = re.findall("[^*]", x)
 						word = ""
-						for w in message:
+						for w in exist:
 							word += w
-						x = re.sub("\*\*(.*?)\*\*", f"<b>{word}</b>", x)	
+						x = re.sub(r"\*\*([^*]*)\*\*", r"<strong>\1</strong>", x)	
 
-					exist = re.findall("(?<!\*)\*(?!\*)(.*?)(?<!\*)\*(?!\*)", x)
+					exist = re.findall(r"(?<!\*)\*([^*]+)\*(?!\*)", x)
 					if(exist):
-						message = re.findall("[^*]", x)
 						word = ""
-						for w in message:
+						for w in exist:
 							word += w
-						x = re.sub("(?<!\*)\*(?!\*)(.*?)(?<!\*)\*(?!\*)", f"<em>{word}</em>", x)	
+						x = re.sub(r"(?<!\*)\*([^*]+)\*(?!\*)", r"<em>\1</em>", x)
 
-					exist = re.findall("[>] .{0,}", x)
+					exist = re.findall(r"^>\s*(.*)$", x)
 					if(exist):
 						message = x[2: len(x) - 1]
-						x = re.sub("[>] .{0,}", f"<div style=\"border-left: 3px solid gray;\"><p>{message}</p></div>", x)
+						x = re.sub(r"^>\s*(.*)$", f"<div style=\"border-left: 3px solid gray;\"><p>{message}</p></div>", x)
 					
-					exist = re.findall("^\d+\.+\s+(.*)$", x)
+					exist = re.findall(r"^\d+\.+\s+(.*)$", x)
 					if(exist):
 						if(not inlist):
 							typelist = "ol"
@@ -118,9 +114,9 @@ class open_md_viewer(sublime_plugin.TextCommand):
 							html += "</ul><br><ol>"
 
 						message = x[2: len(x)]
-						x = re.sub("\d+\.+\s+(.*)$", f"<li>{message}</li>", x)
+						x = re.sub(r"\d+\.+\s+(.*)$", f"<li>{message}</li>", x)
 
-					exist = re.findall("^-\s+(.*)$", x)
+					exist = re.findall(r"^-\s+(.*)$", x)
 					if(exist):
 						if(not inlist):
 							typelist = "ul"
@@ -130,26 +126,23 @@ class open_md_viewer(sublime_plugin.TextCommand):
 							html += "</ol><br><ul>"
 
 						message = x[2: len(x)]
-						x = re.sub("-\s+(.*)$", f"<li>{message}</li>", x)	
+						x = re.sub(r"-\s+(.*)$", f"<li>{message}</li>", x)	
 
-					exist = re.findall("^[#]{1,}\s(.*)$", x)
+					exist = re.findall(r"^[#]{1,}\s(.*)$", x)
 					if(exist):
 						num = x.index(" ")
 						message = x[num : len(x)]
-						x = re.sub("^[#]{1,}\s(.*)$", f"<h{num}>{message}</h{num}>", x)
+						x = re.sub(r"^[#]{1,}\s(.*)$", f"<h{num}>{message}</h{num}>", x)
 
 
-					exist = re.findall("\n$", x)
+					exist = re.findall(r"\n$", x)
 					if(exist):
-						x = re.sub("\n$", "<br>", x)
+						x = re.sub(r"\n$", "<br>", x)
 
 					html += x		
 		'''
 			dynamic images (if height > width... etc. [max size 500 x 500])
 			add support for https:// res:// and data: images
-			add nested blockquotes
-			fix the gaps under the lists
-			add html tag support inside the md section
 		'''
 			
 		f.close()	
