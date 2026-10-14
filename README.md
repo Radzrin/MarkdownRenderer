@@ -1,8 +1,8 @@
 # A markdown viewer addon for Sublime Text
 
-This was made for Sublime Text 3 to render markdown directly inside the text editor.
+This plugin was made for Sublime Text 3 to render markdown directly inside the text editor.
 
-!["this is what the markdown looks like in use"](img.png)
+![this is what the markdown looks like in use](C:/img.png)
 
 ## Usage
 
@@ -26,5 +26,5 @@ and finally add "{ "command": "open_md_viewer", "caption": "Open markdown in ano
 HTML rendering is also supported
 Only PNG, JPG and GIF (static) are supported by phantom.
 
-[a list of supported html tags]("https://www.sublimetext.com/docs/minihtml.html")
+[a list of supported html tags](https://www.sublimetext.com/docs/minihtml.html)
 
