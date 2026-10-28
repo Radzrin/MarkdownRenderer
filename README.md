@@ -2,12 +2,12 @@
 
 This plugin was made for Sublime Text 3 to render markdown directly inside the text editor.
 
-![this is what the markdown looks like in use](https://github.com/Radzrin/MarkdownRenderer/tree/main/img/screenshotMD.png)
+![this is what the markdown looks like in use](https://github.com/Radzrin/MarkdownRenderer/blob/main/img/screenshotMD.png)
 now becomes:
 
-![this is what the markdown looks like in use](https://github.com/Radzrin/MarkdownRenderer/tree/main/img/sc1.png)
-![this is what the markdown looks like in use](https://github.com/Radzrin/MarkdownRenderer/tree/main/img/sc2.png)
-![this is what the markdown looks like in use](https://github.com/Radzrin/MarkdownRenderer/tree/main/img/sc3.png)
+![this is what the markdown looks like in use](https://github.com/Radzrin/MarkdownRenderer/blob/main/img/sc1.png)
+![this is what the markdown looks like in use](https://github.com/Radzrin/MarkdownRenderer/blob/main/img/sc2.png)
+![this is what the markdown looks like in use](https://github.com/Radzrin/MarkdownRenderer/blob/main/img/sc3.png)
 
 ## Usage
 
